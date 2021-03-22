@@ -5,6 +5,9 @@ import time
 ## This approach avoids using API keys (because we were unsuccessful in obtaining them)
 ## Please limit use of this function because the website restricts the number of calls user per hour 
 
+## Updated: Now allows for multiple hashes 
+## @Pre: String: Hash/Hashes separated by a newline
+
 def decryptHash( hash_value ):
     data = {
         "hash": hash_value,
@@ -31,19 +34,29 @@ def decryptHash( hash_value ):
     ## Sends a requested with hash and key 
     r = requests.post("https://md5decrypt.net/en/Sha512/#answer", data=data)
     response = r.text
-   
-    ## Parses Post HTML response to from the answer 
-    decrypted = response[response.find(data["hash"]): response.find("</b>", response.find(data["hash"]))]
-    hash = data["hash"]
-    decrypted = decrypted.split("<b>")
-    
-    print(decrypted[1])
-    return decrypted[1]
 
-#TODO Write a function to accept a string of hashes and then parse the response this will help prevent calling the url frequently 
+    hash = data["hash"]
+    hashes = hash.split()
+
+    decryptedHashes = []
+
+    ## Parses Post HTML response to from the answer 
+    for x in range(0, len(hashes)):
+        decrypted = response[response.find(hashes[x]): response.find("</b>", response.find(hashes[x]))]
+        if decrypted.find("[ Unfound ]" ) != -1:
+            print("❌","Unfound Hash")
+            decryptedHashes.append("Unfound")
+        else:
+            decrypted = decrypted.split("<b>")
+            decryptedHashes.append(decrypted[1])
+            print("✅",decrypted[1])
+
+    # print(decryptedHashes)
+    return decryptedHashes
+
 
 
 if __name__ == '__main__':
 
-    decryptHash("3c9909afec25354d551dae21590bb26e38d53f2173b8d3dc3eee4c047e7ab1c1eb8b85103e3be7ba613b31bb5c9c36214dc9f14a42fd7a2fdb84856bca5c44c2" )
+    decryptHash("9b71d224bd62f3785d96d46ad3ea3d73319bfbc2890caadae2dff72519673ca72323c3d99ba5c11d7c7acc6e14b8c5da0c4663475c2e5c3adef46f73bcdec043\n3c9909afec25354d551dae21590bb26e38d53f2173b8d3dc3eee4c047e7ab1c1eb8b85103e3be7ba613b31bb5c9c36214dc9f14a42fd7a2fdb84856bca5c44c2\n40b3cfbc401ac193651eba2cecf6b8a62c967bdd9450834b5aa1f71de09c33e5bcfeba7bff222835bf67b2118a25d7b17b530c74b805467251746c5e03528d8b" )
    
