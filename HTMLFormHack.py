@@ -44,12 +44,10 @@ def decryptHash( hash_value ):
     for x in range(0, len(hashes)):
         decrypted = response[response.find(hashes[x]): response.find("</b>", response.find(hashes[x]))]
         if decrypted.find("[ Unfound ]" ) != -1:
-            print("❌","Unfound Hash")
             decryptedHashes.append("Unfound")
         else:
             decrypted = decrypted.split("<b>")
             decryptedHashes.append(decrypted[1])
-            print("✅",decrypted[1])
 
     # print(decryptedHashes)
     return decryptedHashes
