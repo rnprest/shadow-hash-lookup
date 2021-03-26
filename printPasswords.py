@@ -1,27 +1,20 @@
 import sys
-from HTMLFormHack import *
+from HTMLFormHack import decryptHash, listToString
 
-# Error handling
-if len(sys.argv) != 2:
-    errorMessage = """Error: Please see correct syntax below
-    \t$ python3 printPasswords.py shadowCopy"""
+needToChangePasswordList = []
+
+# Check if shadow file exists
+try:
+    shadowFile = open('/etc/shadow', 'r')
+except FileNotFoundError:
+    errorMessage = ("Error: Can't find/open shadow file.\n"
+    "If you know /etc/shadow exists, then run this program with privileges:\n"
+    "\t$ sudo python3 printPasswords.py")
     sys.exit(errorMessage)
 
-userList = [] # Contains all users from the shadow file
-hashList = [] # Limit uses of decryptHash function call by combining all hashes
-needToChangePasswordList = []
-shadowFile = open(sys.argv[1], 'r')
-
 print('User Password Security Report:')
-for line in shadowFile:
-    if '$6$' in line:
-        beforeHashIndex = line.find(':')
-        afterHashIndex = line.find(':', beforeHashIndex+1)
-        username = line[:beforeHashIndex]
-        passwordHash = line[beforeHashIndex+4:afterHashIndex]
-        userList.append(username)
-        hashList.append(passwordHash)
 
+userList, hashList = getUsersAndPasswords(shadowFile)
 hashes = listToString(hashList)
 decryptedHashes = decryptHash(hashes)
 
@@ -42,4 +35,20 @@ print('\nThe following users need to change their passwords:')
 for user in needToChangePasswordList:
     print(user)
 
+# -----------------------------------------------------------------------------
+# functions
+# -----------------------------------------------------------------------------
 
+# Parse the usernames and SHA512-encrypted passwords from the shadow file
+def getUsersAndPasswords (file):
+    users = [] # Contains all users from the shadow file
+    hashes = [] # Limit uses of decryptHash function call by combining all hashes
+    for line in file:
+        if '$6$' in line:
+            beforeHashIndex = line.find(':')
+            afterHashIndex = line.find(':', beforeHashIndex+1)
+            username = line[:beforeHashIndex]
+            passwordHash = line[beforeHashIndex+4:afterHashIndex]
+            users.append(username)
+            hashes.append(passwordHash)
+    return users, hashes
