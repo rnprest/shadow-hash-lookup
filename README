@@ -1,0 +1,14 @@
+Shadow Hash Lookup
+
+This python program is a command-line tool that reads a list of unsalted usernames and hashes
+compares the encrypted hashes with an online database of known hashes. Utilizing an API, 
+https://md5decrypt.net/en/Sha512/, our command-line tool can identify if a password exists 
+through a reverse lookup and will then report if your passwords are secure.
+
+Setup / How to Use 
+- clone the repository
+- run python printPasswords.py <hashfile>
+
+How to Make Hash File
+
+
